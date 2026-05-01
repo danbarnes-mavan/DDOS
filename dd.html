@@ -336,6 +336,43 @@
   </style>
 </head>
 <body>
+<script>
+(function(){
+  var KEY="mavanos_auth";
+  function checkAuth(){
+    if(sessionStorage.getItem(KEY)==="ok")return;
+    document.body.style.overflow="hidden";
+    var o=document.createElement("div");
+    o.id="gate-overlay";
+    o.style.cssText="position:fixed;inset:0;background:#07110A;z-index:99999;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;";
+    var inner='<div style="text-align:center;width:340px;">'
+      +'<div style="font-family:Fraunces,serif;font-size:28px;font-weight:600;color:#C4F135;letter-spacing:-.02em;margin-bottom:6px;">MavanOS</div>'
+      +'<div style="font-size:11px;color:#516357;text-transform:uppercase;letter-spacing:.12em;margin-bottom:36px;">Internal Operations Platform</div>'
+      +'<input id="gate-pw" type="password" placeholder="Enter passphrase" autocomplete="off" style="width:100%;background:#0C1A0E;border:1px solid #2E4233;color:#E4EDE5;font-family:JetBrains Mono,monospace;font-size:13px;padding:11px 14px;border-radius:4px;outline:none;margin-bottom:10px;display:block;" />'
+      +'<button id="gate-btn" style="width:100%;background:#C4F135;color:#07110A;border:none;font-family:JetBrains Mono,monospace;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:11px;border-radius:4px;cursor:pointer;">Enter</button>'
+      +'<div id="gate-err" style="font-size:11px;color:#FF5B47;margin-top:10px;min-height:16px;"></div>'
+      +'</div>';
+    o.innerHTML=inner;
+    document.body.prepend(o);
+    function attempt(){
+      var pw=document.getElementById("gate-pw").value;
+      if(pw==="MAVANOS2026"){
+        sessionStorage.setItem(KEY,"ok");
+        document.getElementById("gate-overlay").remove();
+        document.body.style.overflow="";
+      } else {
+        document.getElementById("gate-err").textContent="Incorrect passphrase.";
+        document.getElementById("gate-pw").value="";
+        document.getElementById("gate-pw").focus();
+      }
+    }
+    document.getElementById("gate-btn").addEventListener("click",attempt);
+    document.getElementById("gate-pw").addEventListener("keydown",function(e){if(e.key==="Enter")attempt();});
+    setTimeout(function(){document.getElementById("gate-pw").focus();},60);
+  }
+  checkAuth();
+})();
+</script>
 
 <!-- TOP BAR -->
 <header class="bar">
