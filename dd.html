@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IBG Fund I — Due Diligence</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:        #07110A;
+      --bg-2:      #0C1A0E;
+      --bg-3:      #111F13;
+      --surface:   #162019;
+      --surface-2: #1C2B1F;
+      --border:    #223327;
+      --border-2:  #2E4233;
+      --accent:    #C4F135;
+      --accent-dim:#8BAA24;
+      --accent-glow:rgba(196,241,53,.12);
+      --text-1:    #E4EDE5;
+      --text-2:    #8FA893;
+      --text-3:    #516357;
+      --danger:    #FF5B47;
+      --danger-bg: rgba(255,91,71,.12);
+      --warn:      #F0A830;
+      --warn-bg:   rgba(240,168,48,.12);
+      --ok-bg:     rgba(196,241,53,.08);
+      --font-d:    'Fraunces', Georgia, serif;
+      --font-m:    'JetBrains Mono', 'Courier New', monospace;
+      --r:         6px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text-1); font-family: var(--font-m); font-size: 13px; line-height: 1.65; min-height: 100vh; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 3px; }
+    ::selection { background: var(--accent-glow); }
+
+    /* ── TOPBAR ── */
+    .bar {
+      position: sticky; top: 0; z-index: 200;
+      display: flex; align-items: center; gap: 12px;
+      padding: 0 24px; height: 54px;
+      background: var(--bg-2); border-bottom: 1px solid var(--border);
+    }
+    .bar-logo { font-family: var(--font-d); font-size: 15px; font-weight: 600; color: var(--accent); letter-spacing: -.02em; white-space: nowrap; }
+    .bar-sep  { color: var(--border-2); }
+    .bar-ctx  { flex: 1; font-size: 12px; color: var(--text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .bar-ctx strong { color: var(--text-1); }
+    .bar-actions { display: flex; gap: 8px; margin-left: auto; }
+
+    /* ── BUTTONS ── */
+    .btn {
+      font-family: var(--font-m); font-size: 10px; font-weight: 500;
+      letter-spacing: .07em; text-transform: uppercase;
+      padding: 6px 14px; border-radius: 4px;
+      border: 1px solid var(--border-2);
+      background: transparent; color: var(--text-2);
+      cursor: pointer; transition: all .14s; white-space: nowrap;
+    }
+    .btn:hover { border-color: var(--accent-dim); color: var(--text-1); }
+    .btn-p    { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 600; }
+    .btn-p:hover { background: #d5ff48; border-color: #d5ff48; }
+    .btn-d    { border-color: var(--danger); color: var(--danger); }
+    .btn-d:hover { background: var(--danger-bg); }
+    .btn-sm   { padding: 4px 9px; font-size: 9px; }
+
+    /* ── HOME ── */
+    #home { padding: 44px 48px; max-width: 960px; margin: 0 auto; }
+    .home-h h1 { font-family: var(--font-d); font-size: 34px; font-weight: 300; letter-spacing: -.025em; line-height: 1.15; margin-bottom: 6px; }
+    .home-h h1 em { color: var(--accent); font-style: italic; }
+    .home-h p  { font-size: 12px; color: var(--text-2); margin-bottom: 32px; max-width: 420px; }
+    .deal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 14px; }
+    .deal-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 20px; cursor: pointer;
+      transition: all .18s; position: relative; overflow: hidden;
+    }
+    .deal-card::after { content:''; position:absolute; top:0; left:0; right:0; height:2px; background: var(--border-2); transition: background .18s; }
+    .deal-card:hover { border-color: var(--border-2); transform: translateY(-2px); background: var(--surface-2); }
+    .deal-card:hover::after { background: var(--accent); }
+    .dc-name   { font-family: var(--font-d); font-size: 19px; font-weight: 600; margin-bottom: 3px; }
+    .dc-source { font-size: 11px; color: var(--text-3); margin-bottom: 14px; }
+    .dc-pips   { display: flex; gap: 4px; margin-bottom: 12px; }
+    .pip       { height: 4px; flex: 1; border-radius: 2px; background: var(--border-2); }
+    .pip.active{ background: var(--accent); }
+    .pip.done  { background: var(--accent-dim); }
+    .pip.fail  { background: var(--danger); }
+    .dc-foot   { display: flex; justify-content: space-between; align-items: center; }
+    .badge     { font-size: 9px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; padding: 3px 8px; border-radius: 3px; border: 1px solid transparent; }
+    .badge-idle{ background: var(--bg-3); color: var(--text-3); border-color: var(--border-2); }
+    .badge-on  { background: var(--ok-bg); color: var(--accent); border-color: rgba(196,241,53,.25); }
+    .badge-kill{ background: var(--danger-bg); color: var(--danger); border-color: rgba(255,91,71,.25); }
+    .badge-buy { background: var(--ok-bg); color: var(--accent); border-color: rgba(196,241,53,.25); }
+    .dc-date   { font-size: 10px; color: var(--text-3); }
+    .card-new  {
+      border-style: dashed; min-height: 120px;
+      display: flex; align-items: center; justify-content: center;
+      gap: 8px; color: var(--text-3); font-size: 12px;
+    }
+    .card-new:hover { color: var(--text-2); border-color: var(--accent-dim); }
+
+    /* ── DEAL SCREEN ── */
+    #deal-screen { display: none; }
+    .workspace { display: flex; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 210px; min-width: 210px;
+      background: var(--bg-2); border-right: 1px solid var(--border);
+      position: sticky; top: 54px; height: calc(100vh - 54px);
+      overflow-y: auto; padding: 20px 0; display: flex; flex-direction: column;
+    }
+    .sb-deal { padding: 0 18px 18px; border-bottom: 1px solid var(--border); margin-bottom: 14px; }
+    .sb-deal .lbl { font-size: 9px; color: var(--text-3); text-transform: uppercase; letter-spacing: .12em; margin-bottom: 3px; }
+    .sb-deal .nm  { font-family: var(--font-d); font-size: 15px; font-weight: 600; }
+    .snav-item {
+      display: flex; align-items: center; gap: 11px;
+      padding: 9px 18px; cursor: pointer;
+      border-left: 2px solid transparent; transition: all .13s;
+    }
+    .snav-item:hover { background: var(--surface); border-left-color: var(--border-2); }
+    .snav-item.active{ background: var(--surface); border-left-color: var(--accent); }
+    .snav-item.done  { }
+    .snav-item.failed{ }
+    .snum {
+      width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+      background: var(--border-2); color: var(--text-3);
+      font-size: 10px; font-weight: 600;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .13s;
+    }
+    .snav-item.active .snum { background: var(--accent); color: var(--bg); }
+    .snav-item.done  .snum  { background: var(--accent-dim); color: var(--bg); }
+    .snav-item.failed .snum { background: var(--danger); color: #fff; }
+    .slabel { font-size: 11px; color: var(--text-2); transition: color .13s; }
+    .snav-item.active .slabel { color: var(--text-1); font-weight: 500; }
+    .snav-item.done   .slabel { color: var(--accent-dim); }
+    .snav-item.failed .slabel { color: var(--danger); }
+    .sb-foot { margin-top: auto; padding: 16px 18px; border-top: 1px solid var(--border); font-size: 10px; color: var(--text-3); line-height: 1.7; }
+
+    /* ── MAIN CONTENT ── */
+    .main { flex: 1; padding: 40px 48px; max-width: 820px; min-width: 0; }
+    .stage-hd { margin-bottom: 28px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+    .stage-tag{ font-size: 10px; text-transform: uppercase; letter-spacing: .15em; color: var(--accent); margin-bottom: 7px; }
+    .stage-h  { font-family: var(--font-d); font-size: 28px; font-weight: 300; letter-spacing: -.02em; margin-bottom: 6px; }
+    .stage-p  { font-size: 12px; color: var(--text-2); max-width: 500px; line-height: 1.75; }
+    .tpill    { display: inline-block; margin-top: 8px; font-size: 9px; color: var(--text-3); background: var(--bg-3); border: 1px solid var(--border); padding: 3px 9px; border-radius: 3px; text-transform: uppercase; letter-spacing: .08em; }
+
+    /* ── SECTIONS ── */
+    .sec { margin-bottom: 32px; }
+    .sec-t { font-size: 10px; text-transform: uppercase; letter-spacing: .13em; color: var(--text-3); margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .info-pill { display: inline-block; font-size: 10px; padding: 3px 9px; border-radius: 3px; background: var(--bg-3); border: 1px solid var(--border); color: var(--text-3); margin-bottom: 14px; }
+
+    /* ── FORMS ── */
+    .frow { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 12px; }
+    .fg   { display: flex; flex-direction: column; gap: 5px; }
+    .flbl { font-size: 9px; color: var(--text-3); text-transform: uppercase; letter-spacing: .09em; }
+    .finp, .fsel, .ftxt {
+      font-family: var(--font-m); font-size: 12px; color: var(--text-1);
+      background: var(--bg-3); border: 1px solid var(--border);
+      border-radius: 4px; padding: 8px 11px; width: 100%; outline: none;
+      transition: border-color .13s;
+    }
+    .finp:focus, .fsel:focus, .ftxt:focus { border-color: var(--accent-dim); }
+    .finp::placeholder { color: var(--text-3); }
+    .ftxt { resize: vertical; min-height: 76px; line-height: 1.6; }
+    .fsel option { background: var(--bg-2); }
+
+    /* ── GATE / CHECKLIST ── */
+    .gate-list { display: flex; flex-direction: column; gap: 10px; }
+    .gate-item {
+      display: flex; gap: 13px; padding: 13px 15px; align-items: flex-start;
+      background: var(--bg-3); border: 1px solid var(--border);
+      border-radius: var(--r); cursor: pointer; transition: all .13s;
+    }
+    .gate-item:hover { border-color: var(--border-2); }
+    .gate-item.on-ok { border-color: rgba(196,241,53,.3); background: var(--ok-bg); }
+    .gate-item.on-bad{ border-color: rgba(255,91,71,.3); background: var(--danger-bg); }
+    .gchk {
+      width: 18px; height: 18px; min-width: 18px; margin-top: 2px;
+      border: 1.5px solid var(--border-2); border-radius: 3px;
+      background: var(--bg); display: flex; align-items: center; justify-content: center;
+      font-size: 11px; transition: all .13s;
+    }
+    .gate-item.on-ok  .gchk { background: var(--accent);  border-color: var(--accent);  color: var(--bg); }
+    .gate-item.on-bad .gchk { background: var(--danger);  border-color: var(--danger);  color: #fff; }
+    .gt  { font-size: 13px; color: var(--text-1); font-weight: 500; margin-bottom: 2px; }
+    .gd  { font-size: 11px; color: var(--text-2); line-height: 1.5; }
+
+    /* ── RESULT BOX ── */
+    .rbox {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 18px; border-radius: var(--r);
+      border: 1px solid var(--border); margin-top: 18px; font-size: 13px;
+    }
+    .rbox.ok  { background: var(--ok-bg);      border-color: rgba(196,241,53,.25); color: var(--accent); }
+    .rbox.bad { background: var(--danger-bg); border-color: rgba(255,91,71,.25);  color: var(--danger); }
+    .rbox.warn{ background: var(--warn-bg);   border-color: rgba(240,168,48,.25); color: var(--warn); }
+    .rbox-icon{ font-size: 18px; }
+    .rbox-sub { font-size: 11px; margin-top: 2px; opacity: .8; }
+
+    /* ── SCORE SLIDERS ── */
+    .score-list { display: flex; flex-direction: column; gap: 14px; }
+    .score-row  { display: grid; grid-template-columns: 155px 1fr 36px; align-items: center; gap: 14px; }
+    .score-lbl  { font-size: 11px; color: var(--text-2); }
+    .score-hint { font-size: 9px; color: var(--text-3); margin-top: 2px; }
+    input[type=range] {
+      -webkit-appearance: none; height: 4px; border-radius: 2px;
+      background: var(--border-2); outline: none; cursor: pointer; width: 100%;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 15px; height: 15px; border-radius: 50%;
+      background: var(--accent); cursor: pointer;
+    }
+    .sv { font-size: 16px; font-weight: 600; color: var(--accent); text-align: right; }
+    .total-score-wrap {
+      margin-top: 18px; padding: 14px 18px; border-radius: var(--r);
+      background: var(--bg-3); border: 1px solid var(--border);
+      display: flex; align-items: center; gap: 16px;
+    }
+    .ts-label { font-size: 10px; color: var(--text-2); text-transform: uppercase; letter-spacing: .1em; }
+    .ts-sub   { font-size: 10px; color: var(--text-3); margin-top: 2px; }
+    .ts-bar   { flex: 1; height: 5px; background: var(--border-2); border-radius: 3px; overflow: hidden; }
+    .ts-fill  { height: 100%; background: var(--accent); border-radius: 3px; transition: width .25s; }
+    .ts-num   { font-family: var(--font-d); font-size: 30px; font-weight: 600; color: var(--accent); }
+
+    /* ── DATA TABLE ── */
+    .dtable { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .dtable th { text-align:left; padding:7px 11px; font-size:9px; text-transform:uppercase; letter-spacing:.1em; color:var(--text-3); border-bottom:1px solid var(--border); font-weight:400; }
+    .dtable td { padding:8px 11px; border-bottom:1px solid var(--border); vertical-align:middle; }
+    .dtable tr:hover td { background: var(--bg-3); }
+    .dtable .dlabel { color: var(--text-2); width: 185px; }
+    .dtable .dsig   { width: 90px; font-size: 9px; color: var(--text-3); text-align: right; }
+    .dinp {
+      background: none; border: none; color: var(--text-1);
+      font-family: var(--font-m); font-size: 12px; width: 100%;
+      outline: none; padding: 0;
+    }
+    .dinp:focus { color: var(--accent); }
+
+    /* ── SIGNAL Q&A ── */
+    .sig-list { display: flex; flex-direction: column; gap: 14px; }
+    .sig-item { background: var(--bg-3); border: 1px solid var(--border); border-radius: var(--r); padding: 15px; }
+    .sig-hd   { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .sig-title{ font-size: 13px; color: var(--text-1); font-weight: 500; }
+    .sig-hint { font-size: 11px; color: var(--text-2); margin-bottom: 10px; line-height: 1.55; font-style: italic; }
+    .rbtns    { display: flex; gap: 6px; }
+    .rbtn {
+      padding: 4px 11px; border-radius: 3px; border: 1px solid var(--border-2);
+      background: transparent; color: var(--text-3);
+      font-family: var(--font-m); font-size: 9px; cursor: pointer;
+      transition: all .13s; text-transform: uppercase; letter-spacing: .06em;
+    }
+    .rbtn:hover { border-color: var(--text-2); color: var(--text-2); }
+    .rbtn.green.on  { background: var(--ok-bg);    border-color: rgba(196,241,53,.4); color: var(--accent); }
+    .rbtn.yellow.on { background: var(--warn-bg);  border-color: rgba(240,168,48,.4); color: var(--warn); }
+    .rbtn.red.on    { background: var(--danger-bg);border-color: rgba(255,91,71,.4);  color: var(--danger); }
+
+    /* ── DECISION ── */
+    .dec-btns { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 18px; }
+    .dec-btn  {
+      padding: 16px; border-radius: var(--r);
+      border: 1px solid var(--border-2); background: var(--bg-3);
+      cursor: pointer; text-align: center; font-family: var(--font-m);
+      transition: all .17s;
+    }
+    .dec-btn:hover { transform: translateY(-1px); border-color: var(--border-2); }
+    .dec-icon  { font-size: 22px; margin-bottom: 7px; }
+    .dec-label { font-size: 10px; text-transform: uppercase; letter-spacing: .09em; color: var(--text-2); font-weight: 600; }
+    .dec-btn.buy.on    { background: var(--ok-bg);    border-color: rgba(196,241,53,.35); }
+    .dec-btn.buy.on .dec-label    { color: var(--accent); }
+    .dec-btn.pass.on   { background: var(--danger-bg); border-color: rgba(255,91,71,.35); }
+    .dec-btn.pass.on .dec-label   { color: var(--danger); }
+    .dec-btn.reengage.on{ background: var(--warn-bg); border-color: rgba(240,168,48,.35); }
+    .dec-btn.reengage.on .dec-label{ color: var(--warn); }
+
+    /* ── CALC BOX ── */
+    .calc-box { background: var(--bg-3); border: 1px solid var(--border); border-radius: var(--r); padding: 22px; }
+    .calc-ins { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+    .calc-res {
+      padding: 18px; background: var(--surface); border: 1px solid var(--border-2);
+      border-radius: var(--r); display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;
+    }
+    .cr-lbl { font-size: 10px; color: var(--text-2); text-transform: uppercase; letter-spacing: .1em; }
+    .cr-sub { font-size: 10px; color: var(--text-3); margin-top: 2px; }
+    .cr-val { font-family: var(--font-d); font-size: 42px; font-weight: 600; color: var(--accent); }
+    .cr-unit{ font-size: 12px; color: var(--text-2); margin-bottom: 8px; }
+    .calc-scen{ display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+    .cs { padding: 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; text-align: center; }
+    .cs-lbl { font-size: 9px; color: var(--text-3); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px; }
+    .cs-val { font-size: 20px; font-weight: 600; color: var(--text-1); }
+    .cs-note{ font-size: 9px; color: var(--text-3); margin-top: 2px; }
+
+    /* ── COMPETITORS ── */
+    .comp-row { display: grid; grid-template-columns: 1fr 1fr 80px 30px; gap: 8px; align-items: center; margin-bottom: 8px; }
+
+    /* ── STAGE FOOTER ── */
+    .stage-foot {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 22px 0; margin-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── MODAL ── */
+    .overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.72);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 900; backdrop-filter: blur(5px);
+    }
+    .modal {
+      background: var(--bg-2); border: 1px solid var(--border-2);
+      border-radius: var(--r); padding: 30px; width: 460px; max-width: 92vw;
+    }
+    .modal-h  { font-family: var(--font-d); font-size: 22px; font-weight: 300; margin-bottom: 4px; }
+    .modal-sh { font-size: 11px; color: var(--text-2); margin-bottom: 22px; }
+    .modal-form{ display: flex; flex-direction: column; gap: 14px; }
+    .modal-act { display: flex; gap: 8px; justify-content: flex-end; margin-top: 22px; }
+
+    /* ── UTILS ── */
+    .hidden { display: none !important; }
+    hr.sep  { border: none; border-top: 1px solid var(--border); margin: 22px 0; }
+    .risk-item { display: flex; align-items: center; gap: 11px; margin-bottom: 9px; }
+    .risk-num  {
+      width: 20px; height: 20px; border-radius: 50%; background: var(--danger);
+      color: #fff; font-size: 9px; font-weight: 600;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    @media print {
+      .bar, .sidebar, .stage-foot, .bar-actions { display:none!important; }
+      .workspace { display: block; }
+      .main { padding: 0; max-width: 100%; }
+      body { background:#fff; color:#111; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<header class="bar">
+  <span class="bar-logo">IBG Fund I</span>
+  <span class="bar-sep">|</span>
+  <span class="bar-ctx" id="bar-ctx">Deal Due Diligence</span>
+  <div class="bar-actions" id="ba-home">
+    <button class="btn btn-p" onclick="showModal()">+ New Deal</button>
+  </div>
+  <div class="bar-actions hidden" id="ba-deal">
+    <button class="btn" onclick="showHome()">← All Deals</button>
+    <button class="btn" onclick="exportMemo()">Export Memo</button>
+    <button class="btn btn-d" onclick="deleteDeal()">Delete</button>
+  </div>
+</header>
+
+<!-- HOME -->
+<div id="home">
+  <div class="home-h">
+    <h1>Deal <em>Pipeline</em></h1>
+    <p>Track every acquisition target through the IBG due diligence framework. Near-term deals deploy from the $10M fund (Craig Sherman). IBG Fund I ($150M) is the longer-horizon vehicle. Same framework applies to both.</p>
+  </div>
+  <div class="deal-grid" id="deal-grid"></div>
+</div>
+
+<!-- DEAL WORKSPACE -->
+<div id="deal-screen">
+  <div class="workspace">
+    <nav class="sidebar">
+      <div class="sb-deal">
+        <div class="lbl">Current Deal</div>
+        <div class="nm" id="sb-name">—</div>
+      </div>
+      <div id="snav"></div>
+      <div class="sb-foot">IBG Funds<br>$10M Fund · IBG Fund I $150M<br>DD v1.0 · Internal</div>
+    </nav>
+    <main class="main" id="main-content"></main>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="overlay hidden" id="modal">
+  <div class="modal">
+    <div class="modal-h">New Deal</div>
+    <div class="modal-sh">Add an acquisition target to the pipeline</div>
+    <div class="modal-form">
+      <div class="fg"><label class="flbl">Company / App Name</label><input class="finp" id="m-name" placeholder="e.g. Arise" /></div>
+      <div class="fg"><label class="flbl">Deal Source</label><input class="finp" id="m-source" placeholder="e.g. Evelyn Herrera" /></div>
+      <div class="fg"><label class="flbl">Category / Sector</label><input class="finp" id="m-sector" placeholder="e.g. Gamified Fitness App" /></div>
+      <div class="fg"><label class="flbl">Initial Notes</label><textarea class="ftxt" id="m-notes" style="min-height:56px;" placeholder="Brief context..."></textarea></div>
+    </div>
+    <div class="modal-act">
+      <button class="btn" onclick="hideModal()">Cancel</button>
+      <button class="btn btn-p" onclick="createDeal()">Create Deal</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════════════════
+const STAGES = [
+  { id:0, lbl:'Thesis Filter',       time:'5 min',    desc:'Hard pass/fail on five non-negotiable criteria. Any failure is an instant kill.' },
+  { id:1, lbl:'Surface Screen',      time:'20-30 min', desc:'Financial snapshot, digital deficiency scoring, and fraud signal check from the P&L alone.' },
+  { id:2, lbl:'Pre-Call Research',   time:'45-60 min', desc:'App store analysis, competitive map, geographic opportunity. Know more than the founder expects.' },
+  { id:3, lbl:'Founder Call',        time:'30-60 min', desc:'The trust signal session. Dan or Matt leads. Ellyn owns prep, brief, and notes.' },
+  { id:4, lbl:'Data Room',           time:'2-4 hrs',   desc:'Verify everything from Stages 1-3. Direct platform access required — no screenshots or PDF reports.' },
+  { id:5, lbl:'Decision',            time:'2-3 hrs',   desc:'Break-even math, value creation thesis, and go/no-go recommendation for Matt.' },
+];
+
+// ══════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════
+let S = { deals:[], activeDeal:null };
+
+function load() { try { const d=localStorage.getItem('ibg-dd'); if(d) S=JSON.parse(d); } catch(e){} }
+function save() { try { localStorage.setItem('ibg-dd', JSON.stringify(S)); } catch(e){} }
+function cur()  { return S.deals.find(d=>d.id===S.activeDeal); }
+
+function freshDeal() {
+  return {
+    // stage data
+    s0:{ pass_ebitda:false, pass_digital:false, pass_control:false, pass_market:false, pass_mavan:false,
+         dq_single:false, dq_regulated:false, dq_nopl:false, dq_cash:false, notes:'', _r:null },
+    s1:{ ttmRev:'', ttmProfit:'', margin:'', ua:'', revType:'subscription', arpu:'', installs:'',
+         geo1:'', geo2:'', geo3:'',
+         d_paid:3, d_platform:3, d_geo:3, d_creative:3, d_analytics:3,
+         f_disconnect:false, f_clean:false, f_cpi:false, f_gaps:false,
+         bigOpp:'', bigRisk:'', notes:'', _r:null },
+    s2:{ rating:'', reviews:'', trend:'stable', keywords:'',
+         competitors:[], geoArpu:'', geoBarrier:'none', bigOpp:'', bigQ:'', brief:'', _r:null },
+    s3:{ q_why_r:'', q_why_n:'', q_cohort_r:'', q_cohort_n:'', q_organic_r:'', q_organic_n:'',
+         q_platform_r:'', q_platform_n:'', q_data_r:'', q_data_n:'', q_team_r:'', q_team_n:'',
+         overall:'', notes:'', _r:null },
+    s4:{ v_rev:false, v_mix:false, v_ad:false, v_app:false,
+         trueMRR:'', churn:'', ltv:'', cac:'', organicPct:'',
+         cohorts:'', rf_var:false, rf_churn:false, rf_pay:false, rf_sad:false, notes:'', _r:null },
+    s5:{ price:'', monthly:'', l_ua:3, l_plat:3, l_geo:3, l_ret:3, l_creative:3,
+         risk0:'', risk1:'', risk2:'', rec:'', priceRange:'', finalNotes:'', _r:null },
+  };
+}
+
+// ══════════════════════════════════════════════════════
+// HOME
+// ══════════════════════════════════════════════════════
+function showHome() {
+  S.activeDeal = null;
+  document.getElementById('home').style.display = 'block';
+  document.getElementById('deal-screen').style.display = 'none';
+  document.getElementById('ba-home').classList.remove('hidden');
+  document.getElementById('ba-deal').classList.add('hidden');
+  document.getElementById('bar-ctx').innerHTML = 'Deal Due Diligence';
+  renderHome();
+}
+
+function renderHome() {
+  const grid = document.getElementById('deal-grid');
+  let h = `<div class="deal-card card-new" onclick="showModal()"><span style="font-size:22px;color:var(--accent)">+</span><span>Add New Deal</span></div>`;
+  [...S.deals].reverse().forEach(d => { h += dealCard(d); });
+  grid.innerHTML = h;
+}
+
+function dealCard(d) {
+  const pips = [0,1,2,3,4,5].map(i => {
+    let cls = '';
+    if (d.stage > i) cls = d[`s${i}`]?._r === 'failed' ? 'fail' : 'done';
+    else if (d.stage === i) cls = 'active';
+    return `<div class="pip ${cls}"></div>`;
+  }).join('');
+
+  let bLabel = `Stage ${d.stage}`, bCls = 'badge-on';
+  if (d.s0?._r === 'failed') { bLabel='Killed'; bCls='badge-kill'; }
+  else if (d.s5?.rec === 'pass') { bLabel='Passed'; bCls='badge-kill'; }
+  else if (d.s5?.rec === 'buy')  { bLabel='Buy Signal'; bCls='badge-buy'; }
+  else if (d.stage === 0)        { bLabel='Screening'; bCls='badge-idle'; }
+
+  return `<div class="deal-card" onclick="openDeal('${d.id}')">
+    <div class="dc-name">${d.name}</div>
+    <div class="dc-source">${d.source||'No source'}${d.sector?' · '+d.sector:''}</div>
+    <div class="dc-pips">${pips}</div>
+    <div class="dc-foot">
+      <span class="badge ${bCls}">${bLabel}</span>
+      <span class="dc-date">${d.date}</span>
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════════════════
+// MODAL
+// ══════════════════════════════════════════════════════
+function showModal() { document.getElementById('modal').classList.remove('hidden'); setTimeout(()=>document.getElementById('m-name').focus(),60); }
+function hideModal() {
+  document.getElementById('modal').classList.add('hidden');
+  ['m-name','m-source','m-sector','m-notes'].forEach(id=>document.getElementById(id).value='');
+}
+
+function createDeal() {
+  const name = document.getElementById('m-name').value.trim();
+  if (!name) return alert('Please enter a name');
+  const deal = {
+    id: Date.now()+'', name,
+    source: document.getElementById('m-source').value.trim(),
+    sector: document.getElementById('m-sector').value.trim(),
+    date: new Date().toISOString().slice(0,10),
+    stage: 0,
+    ...freshDeal()
+  };
+  deal.s0.notes = document.getElementById('m-notes').value.trim();
+  S.deals.push(deal); save(); hideModal(); openDeal(deal.id);
+}
+
+// ══════════════════════════════════════════════════════
+// DEAL WORKSPACE
+// ══════════════════════════════════════════════════════
+function openDeal(id) {
+  S.activeDeal = id;
+  const d = cur(); if (!d) return;
+  document.getElementById('home').style.display = 'none';
+  document.getElementById('deal-screen').style.display = 'block';
+  document.getElementById('ba-home').classList.add('hidden');
+  document.getElementById('ba-deal').classList.remove('hidden');
+  document.getElementById('bar-ctx').innerHTML = `<strong>${d.name}</strong> — Due Diligence`;
+  document.getElementById('sb-name').textContent = d.name;
+  renderNav(); renderStage(d.stage);
+}
+
+function renderNav() {
+  const d = cur();
+  document.getElementById('snav').innerHTML = STAGES.map(s => {
+    let cls = '';
+    if (d.stage === s.id) cls = 'active';
+    else if (d.stage > s.id) cls = d[`s${s.id}`]?._r === 'failed' ? 'failed' : 'done';
+    const icon = cls==='failed' ? '✕' : cls==='done' ? '✓' : s.id;
+    return `<div class="snav-item ${cls}" onclick="goto(${s.id})">
+      <div class="snum">${icon}</div>
+      <div class="slabel">${s.lbl}</div>
+    </div>`;
+  }).join('');
+}
+
+function goto(n) {
+  const d = cur(); if(!d) return;
+  d.stage = n; save(); renderNav(); renderStage(n);
+}
+
+function renderStage(n) {
+  const d = cur(); const si = STAGES[n];
+  document.getElementById('main-content').innerHTML =
+    `<div class="stage-hd">
+      <div class="stage-tag">Stage ${n} <span class="tpill">${si.time}</span></div>
+      <h2 class="stage-h">${si.lbl}</h2>
+      <p class="stage-p">${si.desc}</p>
+    </div>` + buildStage(n, d);
+  bindStage(n, d);
+}
+
+// ══════════════════════════════════════════════════════
+// STAGE BUILDERS
+// ══════════════════════════════════════════════════════
+function buildStage(n, d) {
+  return [s0,s1,s2,s3,s4,s5][n](d);
+}
+
+// ─── STAGE 0 ───────────────────────────────────────
+function s0(d) {
+  const q = d.s0;
+  const gates = [
+    ['pass_ebitda', 'EBITDA Positive', 'Generating actual profit — not projected. If only revenue is shown, request the full P&L before proceeding.'],
+    ['pass_digital', 'Digitally Deficient', 'No paid UA (or very early-stage), single platform, narrow geography, no CRM/lifecycle, no analytics infrastructure. This is the value creation gap MAVAN fills.'],
+    ['pass_control', 'Control Stake Achievable', 'IBG requires 51%+ ownership. Complex VC cap tables or founder refusal to discuss majority control = instant pass.'],
+    ['pass_market',  'Lower-Mid-Market', 'Rough guide: $500K–$10M EBITDA, enterprise value below $50M. Product-only acquisitions sit at the smaller end.'],
+    ['pass_mavan',   'MAVAN Is The Operator', 'MAVAN\'s actual capability (performance marketing, creative, lifecycle, analytics) addresses the primary value gap. Supply chain, B2B enterprise sales = pass.'],
+  ];
+  const dqs = [
+    ['dq_single',     'Single Customer / API Dependency', 'Majority revenue from one customer or one API (e.g., entirely OpenAI-dependent)'],
+    ['dq_regulated',  'Highly Regulated Industry', 'Pharma, financial services where marketing is structurally constrained by compliance'],
+    ['dq_nopl',       'No Verifiable P&L', 'Revenue claimed but no P&L available or verifiable'],
+    ['dq_cash',       'All-Cash Above 5x EBITDA, No Earnout', 'Seller demanding all-cash with no earnout structure above 5x multiple'],
+  ];
+  const allPass = gates.every(g=>q[g[0]]);
+  const anyDQ   = dqs.some(g=>q[g[0]]);
+  const resultHtml = (allPass||anyDQ) ?
+    `<div class="rbox ${allPass&&!anyDQ?'ok':anyDQ?'bad':'warn'}">
+      <span class="rbox-icon">${allPass&&!anyDQ?'✓':anyDQ?'✕':'⚠'}</span>
+      <div>
+        <strong>${allPass&&!anyDQ?'Passes Thesis Filter — proceed to Stage 1':anyDQ?'Instant disqualifier triggered — kill deal':'Incomplete — confirm all criteria'}</strong>
+        <div class="rbox-sub">${allPass&&!anyDQ?'Surface Screen: analyze P&L, score digital deficiency, check fraud signals.':anyDQ?'Document the reason and mark as killed below.':''+gates.filter(g=>q[g[0]]).length+' / 5 criteria confirmed'}</div>
+      </div>
+    </div>` : '';
+  return `
+    <div class="sec">
+      <div class="sec-t">Thesis Criteria — All 5 Required</div>
+      <div class="gate-list">${gates.map(g=>`
+        <div class="gate-item ${q[g[0]]?'on-ok':''}" onclick="toggleGate('s0','${g[0]}')">
+          <div class="gchk">${q[g[0]]?'✓':''}</div>
+          <div><div class="gt">${g[1]}</div><div class="gd">${g[2]}</div></div>
+        </div>`).join('')}</div>
+    </div>
+    <div class="sec">
+      <div class="sec-t">Instant Disqualifiers — Any Checked = Kill</div>
+      <div class="gate-list">${dqs.map(g=>`
+        <div class="gate-item ${q[g[0]]?'on-bad':''}" onclick="toggleGate('s0','${g[0]}')">
+          <div class="gchk">${q[g[0]]?'✕':''}</div>
+          <div><div class="gt">${g[1]}</div><div class="gd">${g[2]}</div></div>
+        </div>`).join('')}</div>
+    </div>
+    <div class="sec">
+      <div class="sec-t">Notes</div>
+      <textarea class="ftxt" id="s0-notes" placeholder="Source context, initial impressions...">${q.notes||''}</textarea>
+    </div>
+    ${resultHtml}
+    <div class="stage-foot">
+      <div></div>
+      <div style="display:flex;gap:8px;">
+        ${anyDQ?`<button class="btn btn-d" onclick="killStage(0)">Mark as Killed</button>`:''}
+        ${allPass&&!anyDQ?`<button class="btn btn-p" onclick="advance(0)">Surface Screen →</button>`:''}
+      </div>
+    </div>`;
+}
+
+// ─── STAGE 1 ───────────────────────────────────────
+function s1(d) {
+  const q = d.s1;
+  const score = q.d_paid+q.d_platform+q.d_geo+q.d_creative+q.d_analytics;
+  const pct   = (score/25)*100;
+  const fraud = [
+    ['f_disconnect','Revenue-to-Install Disconnect','Large install base with suspiciously low conversion — ask what % converted'],
+    ['f_clean',     'Suspiciously Smooth P&L','Monthly revenue with no variance — real businesses have lumpy revenue'],
+    ['f_cpi',       'Unrealistic CPI vs. Category Benchmarks','Install cost inconsistent with known platform CPIs for the category and geo'],
+    ['f_gaps',      'Missing Months or Unexplained Gaps','Any discontinuity in the P&L timeline'],
+  ];
+  const fc = fraud.filter(f=>q[f[0]]).length;
+  return `
+    <div class="sec">
+      <div class="sec-t">Financial Snapshot</div>
+      <table class="dtable">
+        <tr><td class="dlabel">TTM Revenue</td><td><input class="dinp" id="s1-ttmRev" value="${q.ttmRev}" placeholder="$0"/></td><td class="dsig">top line</td></tr>
+        <tr><td class="dlabel">TTM EBITDA / Profit</td><td><input class="dinp" id="s1-ttmProfit" value="${q.ttmProfit}" placeholder="$0"/></td><td class="dsig">must be +ve</td></tr>
+        <tr><td class="dlabel">Profit Margin</td><td><input class="dinp" id="s1-margin" value="${q.margin}" placeholder="%"/></td><td class="dsig">30%+ healthy</td></tr>
+        <tr><td class="dlabel">Total UA Spend</td><td><input class="dinp" id="s1-ua" value="${q.ua}" placeholder="$0"/></td><td class="dsig">&lt;15% rev = upside</td></tr>
+        <tr><td class="dlabel">Revenue Type</td><td>
+          <select class="dinp" id="s1-revType" style="background:var(--bg-3)">
+            <option value="subscription" ${q.revType==='subscription'?'selected':''}>Subscription</option>
+            <option value="iap" ${q.revType==='iap'?'selected':''}>One-Time IAP</option>
+            <option value="ads" ${q.revType==='ads'?'selected':''}>Advertising</option>
+            <option value="mixed" ${q.revType==='mixed'?'selected':''}>Mixed</option>
+          </select>
+        </td><td class="dsig">sub = best</td></tr>
+        <tr><td class="dlabel">Blended ARPU</td><td><input class="dinp" id="s1-arpu" value="${q.arpu}" placeholder="$0.00"/></td><td class="dsig">iOS vs Android</td></tr>
+        <tr><td class="dlabel">Total Installs</td><td><input class="dinp" id="s1-installs" value="${q.installs}" placeholder="0"/></td><td class="dsig">with what spend?</td></tr>
+        <tr><td class="dlabel">Top 3 Geos</td><td>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+            <input class="dinp" id="s1-geo1" value="${q.geo1}" placeholder="#1"/>
+            <input class="dinp" id="s1-geo2" value="${q.geo2}" placeholder="#2"/>
+            <input class="dinp" id="s1-geo3" value="${q.geo3}" placeholder="#3"/>
+          </div>
+        </td><td class="dsig">US low = upside</td></tr>
+      </table>
+    </div>
+    <div class="sec">
+      <div class="sec-t">Digital Deficiency Score</div>
+      <span class="info-pill">Target: 18+ / 25 — MAVAN is the primary value creation lever</span>
+      <div class="score-list">
+        ${[['d_paid','Paid Acquisition','Never spent on paid (5) vs. sophisticated multi-channel (1)'],
+           ['d_platform','Platform Coverage','iOS only (5) vs. both platforms optimized (1)'],
+           ['d_geo','Geographic Coverage','Single non-English market (5) vs. globally distributed (1)'],
+           ['d_creative','Creative Sophistication','Founder-made statics (5) vs. agency-quality creative testing (1)'],
+           ['d_analytics','Analytics Infrastructure','No analytics beyond app store (5) vs. full-stack attribution (1)']
+        ].map(([k,l,h])=>`
+          <div class="score-row">
+            <div><div class="score-lbl">${l}</div><div class="score-hint">${h}</div></div>
+            <input type="range" min="1" max="5" value="${q[k]||3}" oninput="updScore('s1','${k}',this.value)"/>
+            <div class="sv" id="sv-${k}">${q[k]||3}</div>
+          </div>`).join('')}
+      </div>
+      <div class="total-score-wrap">
+        <div><div class="ts-label">Digital Deficiency Score</div>
+          <div class="ts-sub" id="ds-hint">${score>=18?'⚡ High upside — MAVAN is the operator':score>=12?'⚠ Moderate deficiency':'Low deficiency — limited MAVAN edge'}</div>
+        </div>
+        <div class="ts-bar"><div class="ts-fill" id="ts-fill" style="width:${pct}%"></div></div>
+        <div class="ts-num" id="ts-num">${score}</div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sec-t">Fraud Signal Check</div>
+      <div class="gate-list">${fraud.map(f=>`
+        <div class="gate-item ${q[f[0]]?'on-bad':''}" onclick="toggleGate('s1','${f[0]}')">
+          <div class="gchk">${q[f[0]]?'⚠':''}</div>
+          <div><div class="gt">${f[1]}</div><div class="gd">${f[2]}</div></div>
+        </div>`).join('')}</div>
+      ${fc>0?`<div class="rbox warn"><span class="rbox-icon">⚠</span><div><strong>${fc} fraud signal${fc>1?'s':''} flagged</strong><div class="rbox-sub">Probe these directly on the founder call. Verify in Stage 4 with direct data access.</div></div></div>`:''}
+    </div>
+    <div class="sec">
+      <div class="sec-t">Stage 1 Assessment</div>
+      <div class="frow">
+        <div class="fg"><label class="flbl">Biggest Opportunity</label><input class="finp" id="s1-bigOpp" value="${q.bigOpp}" placeholder="e.g. US market at 2-3x ARPU, zero UA spend"/></div>
+        <div class="fg"><label class="flbl">Biggest Red Flag / Question</label><input class="finp" id="s1-bigRisk" value="${q.bigRisk}" placeholder="e.g. Is December spike repeatable?"/></div>
+      </div>
+      <div class="fg" style="margin-top:10px;"><label class="flbl">Notes</label><textarea class="ftxt" id="s1-notes">${q.notes||''}</textarea></div>
+    </div>
+    <div class="stage-foot">
+      <button class="btn" onclick="goto(0)">← Thesis Filter</button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-d" onclick="killStage(1)">Kill Deal</button>
+        <button class="btn btn-p" onclick="advance(1)">Pre-Call Research →</button>
+      </div>
+    </div>`;
+}
+
+// ─── STAGE 2 ───────────────────────────────────────
+function s2(d) {
+  const q = d.s2;
+  const comps = (q.competitors||[]).map((c,i)=>`
+    <div class="comp-row">
+      <input class="finp" placeholder="Competitor name" value="${c.name||''}" oninput="updComp(${i},'name',this.value)"/>
+      <input class="finp" placeholder="Notes (VC-backed? size?)" value="${c.notes||''}" oninput="updComp(${i},'notes',this.value)"/>
+      <select class="finp" onchange="updComp(${i},'threat',this.value)" style="padding:7px 8px;">
+        <option value="low" ${c.threat==='low'?'selected':''}>Low</option>
+        <option value="med" ${c.threat==='med'?'selected':''}>Medium</option>
+        <option value="high" ${c.threat==='high'?'selected':''}>High ⚠</option>
+      </select>
+      <button class="btn btn-d btn-sm" onclick="remComp(${i})">✕</button>
+    </div>`).join('');
+  return `
+    <div class="sec">
+      <div class="sec-t">App Store Analysis</div>
+      <div class="frow">
+        <div class="fg"><label class="flbl">Overall Rating</label><input class="finp" id="s2-rating" value="${q.rating}" placeholder="4.8 / 5.0"/></div>
+        <div class="fg"><label class="flbl">Review Count</label><input class="finp" id="s2-reviews" value="${q.reviews}" placeholder="7,005"/></div>
+        <div class="fg"><label class="flbl">Rating Trend</label>
+          <select class="finp" id="s2-trend">
+            <option value="improving" ${q.trend==='improving'?'selected':''}>Improving ↑</option>
+            <option value="stable"    ${q.trend==='stable'?'selected':''}>Stable →</option>
+            <option value="declining" ${q.trend==='declining'?'selected':''}>Declining ↓ ⚠</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg"><label class="flbl">Keyword Visibility — can you find it searching its core value proposition?</label>
+        <input class="finp" id="s2-keywords" value="${q.keywords}" placeholder="e.g. 'fitness tracker' → position 3 / not visible without exact name"/>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sec-t">Competitive Landscape</div>
+      <span class="info-pill">Core question: could we build a competitor for less than the asking price?</span>
+      <div id="comp-list">${comps}</div>
+      <button class="btn btn-sm" style="margin-top:8px;" onclick="addComp()">+ Add Competitor</button>
+    </div>
+    <div class="sec">
+      <div class="sec-t">Geographic Opportunity</div>
+      <div class="frow">
+        <div class="fg"><label class="flbl">ARPU Differential (Primary Geo vs. US)</label>
+          <input class="finp" id="s2-geoArpu" value="${q.geoArpu}" placeholder="e.g. India $0.40 vs US $3.50"/>
+        </div>
+        <div class="fg"><label class="flbl">Barrier to US Expansion</label>
+          <select class="finp" id="s2-geoBarrier">
+            <option value="none"       ${q.geoBarrier==='none'?'selected':''}>None — pure marketing spend gap</option>
+            <option value="cultural"   ${q.geoBarrier==='cultural'?'selected':''}>Cultural / language barrier</option>
+            <option value="regulatory" ${q.geoBarrier==='regulatory'?'selected':''}>Regulatory constraint</option>
+            <option value="structural" ${q.geoBarrier==='structural'?'selected':''}>Structural product issue</option>
+            <option value="failed"     ${q.geoBarrier==='failed'?'selected':''}>Tested US and failed ⚠</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sec-t">Pre-Call Brief</div>
+      <div class="frow">
+        <div class="fg"><label class="flbl">Biggest Opportunity (quantified)</label>
+          <input class="finp" id="s2-bigOpp" value="${q.bigOpp}" placeholder="e.g. US at $3.50 ARPU vs India $0.40 — 8x revenue per user if we shift geo mix"/>
+        </div>
+        <div class="fg"><label class="flbl">Biggest Question to Verify on Call</label>
+          <input class="finp" id="s2-bigQ" value="${q.bigQ}" placeholder="e.g. Is December spike organic or paid? Cohort data will tell us."/>
+        </div>
+      </div>
+      <div class="fg" style="margin-top:10px;"><label class="flbl">Brief for Dan / Matt (share 24hrs before the call)</label>
+        <textarea class="ftxt" id="s2-brief" style="min-height:110px;">${q.brief||''}</textarea>
+      </div>
+    </div>
+    <div class="stage-foot">
+      <button class="btn" onclick="goto(1)">← Surface Screen</button>
+      <button class="btn btn-p" onclick="advance(2)">Founder Call →</button>
+    </div>`;
+}
+
+// ─── STAGE 3 ───────────────────────────────────────
+function s3(d) {
+  const q = d.s3;
+  const qs = [
+    ['why',     'Why Are You Selling?',
+     'Probe until you get a specific, coherent answer: why now, why not raise capital instead, why majority not minority. Inconsistency or vagueness = yellow flag. Matt\'s instinct from Arise: "Do you owe somebody a bunch of money that has to get paid today?"'],
+    ['cohort',  'Cohort Economics',
+     '"Walk me through cohort retention. What % of December revenue came from users acquired 90+ days ago vs. last 30 days?" Month 6 retention of 30%+ = sticky. Sub-10% = constant new-user treadmill.'],
+    ['organic', 'Organic vs. Paid Breakdown',
+     '"Walk me through what\'s driving organic installs. Have you run paid acquisition, and if so what did you try and what happened?" Every untouched channel is upside. Arise: Facebook only, no Android, no TikTok.'],
+    ['platform','Platform & Geographic History',
+     '"Why haven\'t you built Android? What held back US expansion?" Structural (no resources) vs. intentional (tested and failed) changes the entire thesis. Arise: structural — React Native, just hadn\'t done it.'],
+    ['data',    'Data Access Willingness',
+     '"Can you give us access to RevenueCat / Mixpanel / ad accounts directly?" Hesitation = yellow flag. Immediate grant = strong positive signal. Patrick gave Arise access immediately — a key conviction moment.'],
+    ['team',    'Team & Documentation',
+     '"Does a team come with this acquisition or is this a product purchase?" Product-only requires world-class documentation. Team = culture + salaries + complexity. Neither is automatically better — you need to know.'],
+  ];
+  return `
+    <div class="sec">
+      <div class="sec-t">Pre-Call Protocol</div>
+      <div class="rbox warn">
+        <span class="rbox-icon">🎯</span>
+        <div><strong>Keep all cards close to your chest.</strong> Never reveal the value creation thesis on this call. You are here to learn, not pitch. The moment you say "we think US is your big opportunity" you have given away negotiating leverage and potentially inflated the price.</div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sec-t">6 Key Questions — Rate Each Signal</div>
+      <div class="sig-list">${qs.map(([k,t,h])=>`
+        <div class="sig-item">
+          <div class="sig-hd">
+            <div class="sig-title">${t}</div>
+            <div class="rbtns">
+              <button class="rbtn green ${q[`q_${k}_r`]==='green'?'on':''}" onclick="setRating('${k}','green')">Green</button>
+              <button class="rbtn yellow ${q[`q_${k}_r`]==='yellow'?'on':''}" onclick="setRating('${k}','yellow')">Yellow</button>
+              <button class="rbtn red ${q[`q_${k}_r`]==='red'?'on':''}" onclick="setRating('${k}','red')">Red</button>
+            </div>
+          </div>
+          <div class="sig-hint">${h}</div>
+          <textarea class="ftxt" style="min-height:52px;" placeholder="Founder's answer and your read..."
+            oninput="setField('s3','q_${k}_n',this.value)">${q[`q_${k}_n`]||''}</textarea>
+        </div>`).join('')}
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sec-t">Overall Call Assessment</div>
+      <div class="dec-btns">
+        <div class="dec-btn ${q.overall==='proceed'?'buy on':''}" onclick="setField('s3','overall','proceed');renderStage(3)">
+          <div class="dec-icon">✅</div><div class="dec-label">Proceed to Data Room</div>
+        </div>
+        <div class="dec-btn ${q.overall==='more'?'reengage on':''}" onclick="setField('s3','overall','more');renderStage(3)">
+          <div class="dec-icon">🔄</div><div class="dec-label">Need More Info</div>
+        </div>
+        <div class="dec-btn ${q.overall==='kill'?'pass on':''}" onclick="setField('s3','overall','kill');renderStage(3)">
+          <div class="dec-icon">❌</div><div class="dec-label">Kill After Call</div>
+        </div>
+      </div>
+      <div class="fg"><label class="flbl">Call Notes</label>
+        <textarea class="ftxt" style="min-height:80px;" oninput="setField('s3','notes',this.value)">${q.notes||''}</textarea>
+      </div>
+    </div>
+    <div class="stage-foot">
+      <button class="btn" onclick="goto(2)">← Pre-Call Research</button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-d" onclick="killStage(3)">Kill Deal</button>
+        <button class="btn btn-p" onclick="advance(3)">Data Room →</button>
+      </div>
+    </div>`;
+}
+
+// ─── STAGE 4 ───────────────────────────────────────
+function s4(d) {
+  const q = d.s4;
+  const v = [
+    ['v_rev','RevenueCat / Superwall Access','True MRR, churn rate, cohort retention, LTV by cohort, trial conversion rate'],
+    ['v_mix','Mixpanel / Analytics Access','DAU/MAU ratio (below 20% = concern), activation rate, feature usage, drop-off in onboarding'],
+    ['v_ad', 'Ad Account Access (not reports)','Facebook / Google UAC — CPI by creative, audience targeting, what they tested and what performed'],
+    ['v_app','App Store Console Access','Installs by geo, device type, organic vs. paid attribution, refund rates'],
+  ];
+  const rf = [
+    ['rf_var',   'P&L Variance >10%','Significant gap between stated P&L and verified RevenueCat / analytics data'],
+    ['rf_churn', 'LTV Below 12 Months','Business requires constant new-user acquisition with no compounding — pure treadmill model'],
+    ['rf_pay',   'Undisclosed Payable or Deferred Revenue','Hidden liabilities that inflate the apparent cash position'],
+    ['rf_sad',   'Single Ad Account Drove 70%+ Installs','Risk of banned / exhausted account — real organic is minimal'],
+  ];
+  const rfc = rf.filter(r=>q[r[0]]).length;
+  return `
+    <div class="sec">
+      <div class="sec-t">Verification Access — Require All Four</div>
+      <div class="gate-list">${v.map(([k,l,n])=>`
+        <div class="gate-item ${q[k]?'on-ok':''}" onclick="toggleGate('s4','${k}')">
+          <div class="gchk">${q[k]?'✓':''}</div>
+          <div><div class="gt">${l}</div><div class="gd">${n}</div></div>
+        </div>`).join('')}</div>
+    </div>
+    <div class="sec">
+      <div class="sec-t">Verified Financial Metrics</div>
+      <table class="dtable">
+        <tr><td class="dlabel">True MRR (from RevenueCat)</td><td><input class="dinp" id="s4-trueMRR" value="${q.trueMRR}" placeholder="$0"/></td><td class="dsig">vs. stated P&L</td></tr>
+        <tr><td class="dlabel">Monthly Churn Rate</td><td><input class="dinp" id="s4-churn" value="${q.churn}" placeholder="%"/></td><td class="dsig">&lt;5% healthy</td></tr>
+        <tr><td class="dlabel">Blended LTV</td><td><input class="dinp" id="s4-ltv" value="${q.ltv}" placeholder="$0"/></td><td class="dsig">12mo+ target</td></tr>
+        <tr><td class="dlabel">All-In CAC (blended)</td><td><input class="dinp" id="s4-cac" value="${q.cac}" placeholder="$0"/></td><td class="dsig">LTV:CAC &gt;3x</td></tr>
+        <tr><td class="dlabel">Organic Revenue %</td><td><input class="dinp" id="s4-organicPct" value="${q.organicPct}" placeholder="%"/></td><td class="dsig">paid % = upside</td></tr>
+      </table>
+    </div>
+    <div class="sec">
+      <div class="sec-t">Cohort Retention Notes</div>
+      <p style="font-size:11px;color:var(--text-2);margin-bottom:12px;line-height:1.7;">
+        Build Month 1 / Month 3 / Month 6 / Month 12 retention for the last 12 monthly cohorts. 
+        30%+ M6 = sticky and compounding. Matt's Arise floor assumption was 0-5% re-up (worst case). 
+        Document findings below.
+      </p>
+      <textarea class="ftxt" style="min-height:90px;font-size:11px;" placeholder="e.g. Jan cohort: M1 62% / M3 38% / M6 24% ..."
+        oninput="setField('s4','cohorts',this.value)">${q.cohorts||''}</textarea>
+    </div>
+    <div class="sec">
+      <div class="sec-t">Red Flag Check</div>
+      <div class="gate-list">${rf.map(([k,l,n])=>`
+        <div class="gate-item ${q[k]?'on-bad':''}" onclick="toggleGate('s4','${k}')">
+          <div class="gchk">${q[k]?'⚠':''}</div>
+          <div><div class="gt">${l}</div><div class="gd">${n}</div></div>
+        </div>`).join('')}
+      </div>
+      ${rfc>0?`<div class="rbox bad"><span class="rbox-icon">⚠</span><div><strong>${rfc} Stage 4 red flag${rfc>1?'s':''} — escalate to Dan immediately.</strong><div class="rbox-sub">These must be discussed before proceeding to term sheet or decision.</div></div></div>`:''}
+    </div>
+    <div class="sec">
+      <div class="sec-t">Data Room Notes</div>
+      <textarea class="ftxt" id="s4-notes" oninput="setField('s4','notes',this.value)">${q.notes||''}</textarea>
+    </div>
+    <div class="stage-foot">
+      <button class="btn" onclick="goto(3)">← Founder Call</button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-d" onclick="killStage(4)">Kill Deal</button>
+        <button class="btn btn-p" onclick="advance(4)">Decision →</button>
+      </div>
+    </div>`;
+}
+
+// ─── STAGE 5 ───────────────────────────────────────
+function s5(d) {
+  const q = d.s5;
+  const pp = parseFloat((q.price||'').replace(/[^0-9.]/g,''))||0;
+  const mp = parseFloat((q.monthly||'').replace(/[^0-9.]/g,''))||0;
+  const bB = mp>0?Math.ceil(pp/mp):null;
+  const bW = mp>0?Math.ceil(pp/(mp*.75)):null;
+  const bBs= mp>0?Math.ceil(pp/(mp*1.3)):null;
+  const levers = [
+    ['l_ua','UA Scaling','Channels untouched, CPI benchmarks, realistic monthly spend at target ROAS'],
+    ['l_plat','Platform Expansion','Android build timeline and cost, revenue model at target install volume'],
+    ['l_geo','Geographic Expansion','Moving US from 4th to 1st — required spend, ARPU improvement, timeline'],
+    ['l_ret','Product / Retention','Feature gaps to improve M3 retention — MAVAN scope vs. product engineering scope'],
+    ['l_creative','Creative Program','UGC / creator strategy, full creative testing cost, realistic CPI improvement'],
+  ];
+  return `
+    <div class="sec">
+      <div class="sec-t">Break-Even Calculator</div>
+      <div class="calc-box">
+        <div class="calc-ins">
+          <div class="fg"><label class="flbl">Purchase Price</label>
+            <input class="finp" id="s5-price" value="${q.price}" placeholder="$3,000,000" oninput="calcBE()"/>
+          </div>
+          <div class="fg"><label class="flbl">Monthly Gross Profit (at acquisition)</label>
+            <input class="finp" id="s5-monthly" value="${q.monthly}" placeholder="$150,000" oninput="calcBE()"/>
+          </div>
+        </div>
+        <div class="calc-res">
+          <div><div class="cr-lbl">Break-Even — Base Case</div><div class="cr-sub">flat revenue, zero growth assumed</div></div>
+          <div style="display:flex;align-items:flex-end;gap:6px;">
+            <div class="cr-val" id="be-base">${bB||'—'}</div>
+            <div class="cr-unit">months</div>
+          </div>
+        </div>
+        <div class="calc-scen">
+          <div class="cs"><div class="cs-lbl">Worst Case</div><div class="cs-val" id="be-worst">${bW||'—'}</div><div class="cs-note">−25% profit</div></div>
+          <div class="cs"><div class="cs-lbl">Base Case</div><div class="cs-val" id="be-base2">${bB||'—'}</div><div class="cs-note">flat</div></div>
+          <div class="cs"><div class="cs-lbl">Best Case</div><div class="cs-val" id="be-best">${bBs||'—'}</div><div class="cs-note">+30% growth</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sec-t">MAVAN Value Creation Levers</div>
+      <div class="score-list">${levers.map(([k,l,h])=>`
+        <div class="score-row">
+          <div><div class="score-lbl">${l}</div><div class="score-hint">${h}</div></div>
+          <input type="range" min="1" max="5" value="${q[k]||3}" oninput="updScore('s5','${k}',this.value)"/>
+          <div class="sv" id="sv-${k}">${q[k]||3}</div>
+        </div>`).join('')}
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sec-t">Top 3 Risks</div>
+      ${[0,1,2].map(i=>`
+        <div class="risk-item">
+          <div class="risk-num">${i+1}</div>
+          <input class="finp" id="s5-risk${i}" value="${q[`risk${i}`]||''}" placeholder="Specific, verified risk..."
+            oninput="setField('s5','risk${i}',this.value)"/>
+        </div>`).join('')}
+    </div>
+    <div class="sec">
+      <div class="sec-t">Go / No-Go Recommendation</div>
+      <div class="dec-btns">
+        <div class="dec-btn buy ${q.rec==='buy'?'on':''}" onclick="setRec('buy')">
+          <div class="dec-icon">🟢</div><div class="dec-label">Buy</div>
+        </div>
+        <div class="dec-btn reengage ${q.rec==='reengage'?'on':''}" onclick="setRec('reengage')">
+          <div class="dec-icon">🟡</div><div class="dec-label">Re-engage at Lower Price</div>
+        </div>
+        <div class="dec-btn pass ${q.rec==='pass'?'on':''}" onclick="setRec('pass')">
+          <div class="dec-icon">🔴</div><div class="dec-label">Pass</div>
+        </div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label class="flbl">Price Range / Walk-Away</label>
+          <input class="finp" id="s5-priceRange" value="${q.priceRange||''}" placeholder="e.g. Buy at $2.5M–$3M, walk at $4M+"
+            oninput="setField('s5','priceRange',this.value)"/>
+        </div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sec-t">Final Notes for Matt</div>
+      <textarea class="ftxt" style="min-height:100px;" oninput="setField('s5','finalNotes',this.value)"
+        placeholder="One-sentence thesis, key conviction points, escalation notes...">${q.finalNotes||''}</textarea>
+    </div>
+    ${q.rec?`<div class="rbox ${q.rec==='buy'?'ok':q.rec==='reengage'?'warn':'bad'}">
+      <span class="rbox-icon">${q.rec==='buy'?'✓':q.rec==='reengage'?'↻':'✕'}</span>
+      <div><strong>${q.rec==='buy'?'Buy Signal — Present to Matt':q.rec==='reengage'?'Re-engage at revised price':q.rec==='pass'?'Pass — document and archive':''}</strong>
+      ${q.priceRange?`<div class="rbox-sub">${q.priceRange}</div>`:''}
+      </div>
+    </div>`:''}
+    <div class="stage-foot">
+      <button class="btn" onclick="goto(4)">← Data Room</button>
+      <button class="btn btn-p" onclick="exportMemo()">Export Deal Memo</button>
+    </div>`;
+}
+
+// ══════════════════════════════════════════════════════
+// DATA BINDING
+// ══════════════════════════════════════════════════════
+function bindStage(n, d) {
+  const binds = {
+    1:[['s1-ttmRev','s1','ttmRev'],['s1-ttmProfit','s1','ttmProfit'],['s1-margin','s1','margin'],
+       ['s1-ua','s1','ua'],['s1-arpu','s1','arpu'],['s1-installs','s1','installs'],
+       ['s1-geo1','s1','geo1'],['s1-geo2','s1','geo2'],['s1-geo3','s1','geo3'],
+       ['s1-bigOpp','s1','bigOpp'],['s1-bigRisk','s1','bigRisk'],['s1-notes','s1','notes'],['s1-revType','s1','revType']],
+    2:[['s2-rating','s2','rating'],['s2-reviews','s2','reviews'],['s2-trend','s2','trend'],
+       ['s2-keywords','s2','keywords'],['s2-geoArpu','s2','geoArpu'],['s2-geoBarrier','s2','geoBarrier'],
+       ['s2-bigOpp','s2','bigOpp'],['s2-bigQ','s2','bigQ'],['s2-brief','s2','brief']],
+    4:[['s4-trueMRR','s4','trueMRR'],['s4-churn','s4','churn'],['s4-ltv','s4','ltv'],
+       ['s4-cac','s4','cac'],['s4-organicPct','s4','organicPct'],['s4-notes','s4','notes']],
+    5:[['s5-price','s5','price'],['s5-monthly','s5','monthly'],['s5-priceRange','s5','priceRange']],
+  };
+  if(n===0) document.getElementById('s0-notes')?.addEventListener('input',e=>setField('s0','notes',e.target.value));
+  (binds[n]||[]).forEach(([id,stage,key])=>{
+    document.getElementById(id)?.addEventListener('input',e=>setField(stage,key,e.target.value));
+    document.getElementById(id)?.addEventListener('change',e=>setField(stage,key,e.target.value));
+  });
+}
+
+function setField(stage, key, val) {
+  const d = cur(); if(!d) return;
+  d[stage][key] = val; save();
+}
+
+function toggleGate(stage, key) {
+  const d = cur(); if(!d) return;
+  d[stage][key] = !d[stage][key]; save();
+  renderStage(d.stage);
+}
+
+function updScore(stage, key, val) {
+  const d = cur(); if(!d) return;
+  d[stage][key] = parseInt(val); save();
+  const el = document.getElementById('sv-'+key); if(el) el.textContent = val;
+  if(stage==='s1') {
+    const q=d.s1, sc=q.d_paid+q.d_platform+q.d_geo+q.d_creative+q.d_analytics;
+    const pct=(sc/25)*100;
+    const n=document.getElementById('ts-num'), b=document.getElementById('ts-fill'), h=document.getElementById('ds-hint');
+    if(n) n.textContent=sc;
+    if(b) b.style.width=pct+'%';
+    if(h) h.textContent=sc>=18?'⚡ High upside — MAVAN is the operator':sc>=12?'⚠ Moderate deficiency':'Low deficiency — limited MAVAN edge';
+  }
+}
+
+function setRating(qKey, rating) {
+  const d = cur(); if(!d) return;
+  d.s3[`q_${qKey}_r`] = rating; save();
+  document.querySelectorAll(`.rbtn[onclick*="'${qKey}'"]`).forEach(b=>{
+    b.classList.toggle('on', b.classList.contains(rating));
+  });
+}
+
+function setRec(val) {
+  const d = cur(); if(!d) return;
+  d.s5.rec = val; save(); renderStage(5);
+}
+
+function calcBE() {
+  const d = cur(); if(!d) return;
+  const pEl=document.getElementById('s5-price'), mEl=document.getElementById('s5-monthly');
+  if(pEl) d.s5.price=pEl.value;
+  if(mEl) d.s5.monthly=mEl.value;
+  save();
+  const pp=parseFloat((d.s5.price||'').replace(/[^0-9.]/g,''))||0;
+  const mp=parseFloat((d.s5.monthly||'').replace(/[^0-9.]/g,''))||0;
+  const bB=mp>0?Math.ceil(pp/mp):null;
+  const bW=mp>0?Math.ceil(pp/(mp*.75)):null;
+  const bBs=mp>0?Math.ceil(pp/(mp*1.3)):null;
+  ['be-base','be-base2'].forEach(id=>{ const e=document.getElementById(id); if(e) e.textContent=bB||'—'; });
+  const w=document.getElementById('be-worst'); if(w) w.textContent=bW||'—';
+  const bs=document.getElementById('be-best');  if(bs) bs.textContent=bBs||'—';
+}
+
+// ── COMPETITORS ─────────────────────────────────────
+function addComp() {
+  const d = cur(); if(!d) return;
+  d.s2.competitors = d.s2.competitors||[];
+  d.s2.competitors.push({name:'',notes:'',threat:'low'}); save(); renderStage(2);
+}
+function remComp(i) {
+  const d = cur(); if(!d) return;
+  d.s2.competitors.splice(i,1); save(); renderStage(2);
+}
+function updComp(i,k,v) {
+  const d = cur(); if(!d) return;
+  d.s2.competitors[i][k]=v; save();
+}
+
+// ── STAGE FLOW ───────────────────────────────────────
+function advance(from) {
+  const d = cur(); if(!d) return;
+  d[`s${from}`]._r = 'passed';
+  d.stage = Math.min(from+1, 5); save(); renderNav(); renderStage(d.stage);
+}
+
+function killStage(n) {
+  if(!confirm('Mark this deal as killed? You can re-open it later.')) return;
+  const d = cur(); if(!d) return;
+  d[`s${n}`]._r = 'failed'; save(); renderNav(); renderStage(n);
+}
+
+// ══════════════════════════════════════════════════════
+// EXPORT
+// ══════════════════════════════════════════════════════
+function exportMemo() {
+  const d = cur(); if(!d) return;
+  const {s0,s1,s2,s3,s4,s5} = d;
+  const pp=parseFloat((s5.price||'').replace(/[^0-9.]/g,''))||0;
+  const mp=parseFloat((s5.monthly||'').replace(/[^0-9.]/g,''))||0;
+  const be=mp>0?Math.ceil(pp/mp):null;
+  const recColor = s5.rec==='buy'?'#2a4a10':s5.rec==='pass'?'#4a1010':'#4a3010';
+  const recText  = s5.rec==='buy'?'BUY SIGNAL':s5.rec==='pass'?'PASS':'RE-ENGAGE';
+
+  const w = window.open('', '_blank');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <title>IBG Fund I — ${d.name} Deal Memo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@300;600&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    body{font-family:'JetBrains Mono',monospace;font-size:12px;color:#111;max-width:760px;margin:0 auto;padding:48px;line-height:1.75;}
+    h1{font-family:'Fraunces',serif;font-size:30px;font-weight:300;letter-spacing:-.02em;margin-bottom:4px;}
+    h2{font-family:'Fraunces',serif;font-size:15px;font-weight:600;margin-top:30px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #ddd;}
+    .meta{font-size:11px;color:#777;margin-bottom:28px;}
+    .kv{display:grid;grid-template-columns:175px 1fr;gap:3px 10px;margin-bottom:6px;}
+    .kl{color:#888;}
+    .tag{display:inline-block;padding:4px 12px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.1em;color:#fff;background:${recColor};}
+    .risk{padding:7px 12px;background:#fafafa;border-left:3px solid #e44;margin-bottom:5px;font-size:11px;}
+    .top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+    .foot{margin-top:44px;padding:14px;background:#f5f5f5;border-radius:4px;font-size:10px;color:#888;}
+    @media print{.print-btn{display:none}}
+    button{margin-top:14px;padding:8px 18px;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:11px;}
+  </style></head><body>
+  <div class="top">
+    <div>
+      <h1>${d.name}</h1>
+      <div class="meta">IBG Fund I · Due Diligence Memo · ${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}</div>
+    </div>
+    ${s5.rec?`<span class="tag">${recText}</span>`:''}
+  </div>
+  <div class="kv">
+    <span class="kl">Deal Source</span><span>${d.source||'—'}</span>
+    <span class="kl">Sector</span><span>${d.sector||'—'}</span>
+    <span class="kl">Date Added</span><span>${d.date}</span>
+    <span class="kl">Price Range</span><span>${s5.priceRange||'—'}</span>
+    <span class="kl">Break-Even (base)</span><span>${be?be+' months':'—'}</span>
+  </div>
+
+  <h2>Stage 0: Thesis Filter</h2>
+  <div class="kv">
+    <span class="kl">EBITDA Positive</span><span>${s0.pass_ebitda?'✓ Confirmed':'✕ Not confirmed'}</span>
+    <span class="kl">Digitally Deficient</span><span>${s0.pass_digital?'✓ Confirmed':'✕ Not confirmed'}</span>
+    <span class="kl">Control Stake</span><span>${s0.pass_control?'✓ Confirmed':'✕ Not confirmed'}</span>
+    <span class="kl">Lower-Mid-Market</span><span>${s0.pass_market?'✓ Confirmed':'✕ Not confirmed'}</span>
+    <span class="kl">MAVAN Operator Fit</span><span>${s0.pass_mavan?'✓ Confirmed':'✕ Not confirmed'}</span>
+  </div>
+  ${s0.notes?`<p style="font-size:11px;color:#666;margin-top:8px;">${s0.notes}</p>`:''}
+
+  <h2>Stage 1: Financial Snapshot</h2>
+  <div class="kv">
+    <span class="kl">TTM Revenue</span><span>${s1.ttmRev||'—'}</span>
+    <span class="kl">TTM EBITDA / Profit</span><span>${s1.ttmProfit||'—'}</span>
+    <span class="kl">Profit Margin</span><span>${s1.margin||'—'}</span>
+    <span class="kl">UA Spend</span><span>${s1.ua||'—'}</span>
+    <span class="kl">Revenue Type</span><span>${s1.revType||'—'}</span>
+    <span class="kl">Blended ARPU</span><span>${s1.arpu||'—'}</span>
+    <span class="kl">Installs</span><span>${s1.installs||'—'}</span>
+    <span class="kl">Top Geographies</span><span>${[s1.geo1,s1.geo2,s1.geo3].filter(Boolean).join(', ')||'—'}</span>
+    <span class="kl">Digital Deficiency Score</span><span>${(s1.d_paid||3)+(s1.d_platform||3)+(s1.d_geo||3)+(s1.d_creative||3)+(s1.d_analytics||3)} / 25</span>
+  </div>
+  ${s1.bigOpp?`<p><strong>Primary Opportunity:</strong> ${s1.bigOpp}</p>`:''}
+  ${s1.bigRisk?`<p><strong>Primary Risk:</strong> ${s1.bigRisk}</p>`:''}
+
+  <h2>Stage 2: Pre-Call Research</h2>
+  <div class="kv">
+    <span class="kl">App Rating</span><span>${s2.rating||'—'} (${s2.reviews||'—'} reviews, trend: ${s2.trend||'—'})</span>
+    <span class="kl">Keyword Visibility</span><span>${s2.keywords||'—'}</span>
+    <span class="kl">Geo ARPU Differential</span><span>${s2.geoArpu||'—'}</span>
+    <span class="kl">US Expansion Barrier</span><span>${s2.geoBarrier||'—'}</span>
+  </div>
+  ${(s2.competitors&&s2.competitors.length)?`<p><strong>Competitors:</strong> ${s2.competitors.map(c=>c.name+(c.threat==='high'?' ⚠':'')).join(', ')}</p>`:''}
+  ${s2.bigOpp?`<p><strong>Opportunity:</strong> ${s2.bigOpp}</p>`:''}
+  ${s2.bigQ?`<p><strong>Key Question:</strong> ${s2.bigQ}</p>`:''}
+
+  <h2>Stage 3: Founder Call Signal Summary</h2>
+  <div class="kv">
+    <span class="kl">Why Selling</span><span>${s3.q_why_r?s3.q_why_r.toUpperCase():'—'} — ${s3.q_why_n||'No notes'}</span>
+    <span class="kl">Cohort Economics</span><span>${s3.q_cohort_r?s3.q_cohort_r.toUpperCase():'—'} — ${s3.q_cohort_n||'No notes'}</span>
+    <span class="kl">Organic vs Paid</span><span>${s3.q_organic_r?s3.q_organic_r.toUpperCase():'—'} — ${s3.q_organic_n||'No notes'}</span>
+    <span class="kl">Platform / Geo</span><span>${s3.q_platform_r?s3.q_platform_r.toUpperCase():'—'} — ${s3.q_platform_n||'No notes'}</span>
+    <span class="kl">Data Access</span><span>${s3.q_data_r?s3.q_data_r.toUpperCase():'—'} — ${s3.q_data_n||'No notes'}</span>
+    <span class="kl">Team / Docs</span><span>${s3.q_team_r?s3.q_team_r.toUpperCase():'—'} — ${s3.q_team_n||'No notes'}</span>
+    <span class="kl">Overall Assessment</span><span>${s3.overall||'—'}</span>
+  </div>
+
+  <h2>Stage 4: Verified Metrics</h2>
+  <div class="kv">
+    <span class="kl">True MRR</span><span>${s4.trueMRR||'—'}</span>
+    <span class="kl">Churn Rate</span><span>${s4.churn||'—'}</span>
+    <span class="kl">LTV</span><span>${s4.ltv||'—'}</span>
+    <span class="kl">CAC (blended)</span><span>${s4.cac||'—'}</span>
+    <span class="kl">Organic Revenue %</span><span>${s4.organicPct||'—'}</span>
+  </div>
+  ${s4.cohorts?`<p><strong>Cohort Notes:</strong> ${s4.cohorts}</p>`:''}
+
+  <h2>Stage 5: Value Creation & Decision</h2>
+  <div class="kv">
+    <span class="kl">Purchase Price</span><span>${s5.price||'—'}</span>
+    <span class="kl">Monthly Gross Profit</span><span>${s5.monthly||'—'}</span>
+    <span class="kl">Break-Even (base)</span><span>${be?be+' months':'—'}</span>
+    <span class="kl">Price Range</span><span>${s5.priceRange||'—'}</span>
+  </div>
+  ${[s5.risk0,s5.risk1,s5.risk2].filter(Boolean).length?`<p><strong>Top Risks:</strong></p>${[s5.risk0,s5.risk1,s5.risk2].filter(Boolean).map((r,i)=>`<div class="risk">${i+1}. ${r}</div>`).join('')}`:''}
+  ${s5.finalNotes?`<p><strong>Recommendation Notes:</strong> ${s5.finalNotes}</p>`:''}
+
+  <div class="foot">IBG Fund I Due Diligence Tool · Internal Use Only · MAVAN / IBG · Generated ${new Date().toISOString()}</div>
+  <button class="print-btn" onclick="window.print()">Print / Save as PDF</button>
+  </body></html>`);
+  w.document.close();
+}
+
+// ══════════════════════════════════════════════════════
+// DEAL MANAGEMENT
+// ══════════════════════════════════════════════════════
+function deleteDeal() {
+  if (!confirm('Delete this deal permanently? This cannot be undone.')) return;
+  S.deals = S.deals.filter(d=>d.id!==S.activeDeal); save(); showHome();
+}
+
+// ══════════════════════════════════════════════════════
+// BOOT
+// ══════════════════════════════════════════════════════
+load();
+showHome();
+document.getElementById('modal').addEventListener('click', e => { if(e.target===document.getElementById('modal')) hideModal(); });
+document.addEventListener('keydown', e => { if(e.key==='Escape') { if(!document.getElementById('modal').classList.contains('hidden')) hideModal(); else if(S.activeDeal) showHome(); } });
+</script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MavanOS — Internal Operations</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #07110A; --bg-2: #0C1A0E; --surface: #111F13;
+      --border: #223327; --border-2: #2E4233;
+      --accent: #C4F135; --accent-dim: #8BAA24;
+      --text-1: #E4EDE5; --text-2: #8FA893; --text-3: #516357;
+      --font-d: 'Fraunces', Georgia, serif;
+      --font-m: 'JetBrains Mono', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text-1); font-family: var(--font-m); min-height: 100vh; display: flex; flex-direction: column; }
+    header { padding: 40px 56px 0; display: flex; align-items: flex-end; justify-content: space-between; }
+    .wordmark { font-family: var(--font-d); font-size: 22px; font-weight: 600; color: var(--accent); letter-spacing: -.02em; }
+    .wordmark span { color: var(--text-3); font-weight: 300; }
+    .tagline { font-size: 11px; color: var(--text-3); letter-spacing: .1em; text-transform: uppercase; }
+    main { flex: 1; padding: 72px 56px 56px; max-width: 880px; }
+    h1 { font-family: var(--font-d); font-size: 48px; font-weight: 300; letter-spacing: -.03em; line-height: 1.1; margin-bottom: 12px; }
+    h1 em { color: var(--accent); font-style: italic; }
+    .sub { font-size: 13px; color: var(--text-2); margin-bottom: 56px; max-width: 400px; line-height: 1.75; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+    .tool-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 6px; padding: 28px 24px; text-decoration: none;
+      color: var(--text-1); position: relative; overflow: hidden;
+      transition: all .18s;
+    }
+    .tool-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background: var(--border-2); transition: background .18s; }
+    .tool-card:hover { border-color: var(--border-2); transform: translateY(-2px); }
+    .tool-card:hover::before { background: var(--accent); }
+    .tool-card.coming { opacity: .45; cursor: default; pointer-events: none; }
+    .tc-icon { font-size: 26px; margin-bottom: 14px; }
+    .tc-name { font-family: var(--font-d); font-size: 20px; font-weight: 600; margin-bottom: 5px; }
+    .tc-desc { font-size: 11px; color: var(--text-2); line-height: 1.7; }
+    .tc-badge {
+      display: inline-block; margin-top: 14px; font-size: 9px; font-weight: 600;
+      letter-spacing: .08em; text-transform: uppercase; padding: 3px 8px;
+      border-radius: 3px; border: 1px solid rgba(196,241,53,.25);
+      background: rgba(196,241,53,.06); color: var(--accent);
+    }
+    .tc-badge.soon { border-color: var(--border-2); background: none; color: var(--text-3); }
+    footer { padding: 24px 56px; border-top: 1px solid var(--border); font-size: 10px; color: var(--text-3); display: flex; justify-content: space-between; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wordmark">Mavan<span>OS</span></div>
+    <div class="tagline">Internal Operations Platform</div>
+  </header>
+  <main>
+    <h1>Operate at<br><em>full speed.</em></h1>
+    <p class="sub">Internal tools for the MAVAN team — deal pipeline, agency ops, and growth intelligence. All in one place.</p>
+    <div class="grid">
+      <a class="tool-card" href="/dd.html">
+        <div class="tc-icon">🔍</div>
+        <div class="tc-name">DD Pipeline</div>
+        <div class="tc-desc">IBG Fund acquisition due diligence — thesis filter to go/no-go decision across six structured stages.</div>
+        <div class="tc-badge">Live</div>
+      </a>
+      <div class="tool-card coming">
+        <div class="tc-icon">📊</div>
+        <div class="tc-name">Agency Pipeline</div>
+        <div class="tc-desc">MAVAN client deal tracking, proposal status, and revenue forecast.</div>
+        <div class="tc-badge soon">Coming Soon</div>
+      </div>
+      <div class="tool-card coming">
+        <div class="tc-icon">🧠</div>
+        <div class="tc-name">Nexus</div>
+        <div class="tc-desc">Multi-client marketing analytics and portfolio budget intelligence.</div>
+        <div class="tc-badge soon">Coming Soon</div>
+      </div>
+      <div class="tool-card coming">
+        <div class="tc-icon">🌐</div>
+        <div class="tc-name">MFN Directory</div>
+        <div class="tc-desc">MAVAN Fractional Network specialist roster and matching.</div>
+        <div class="tc-badge soon">Coming Soon</div>
+      </div>
+    </div>
+  </main>
+  <footer>
+    <span>MavanOS · Internal Use Only</span>
+    <span>MAVAN Group · mavanos.com</span>
+  </footer>
+</body>
+</html>
